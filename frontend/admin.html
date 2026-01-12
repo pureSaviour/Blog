@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>文章管理 - 清新小站</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fresh: {
+                            primary: '#8ecc8e',
+                            secondary: '#a8d8ea',
+                            light: '#f8f9fa',
+                            dark: '#4a5568'
+                        }
+                    }
+                }
+            }
+        }
+	</script>
+</head>
+<body class="bg-fresh-light min-h-screen">
+<!-- 权限验证：非博主直接跳转到登录页 -->
+<script>
+    if (localStorage.getItem('isAdmin') !== 'true') {
+        window.location.href = '/admin-login.html';
+    }
+</script>
+
+<!-- 导航栏 -->
+<nav class="bg-white shadow-sm sticky top-0 z-10">
+	<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+		<a href="/" class="text-fresh-primary text-2xl font-bold">
+			<i class="fa-solid fa-leaf mr-2"></i>清新小站（管理后台）
+		</a>
+		<div class="flex gap-3">
+			<a href="/write.html" class="bg-fresh-primary hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-colors">
+				<i class="fa-solid fa-pen-to-square mr-1"></i>写文章
+			</a>
+			<button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+				<i class="fa-solid fa-sign-out mr-1"></i>退出
+			</button>
+		</div>
+	</div>
+</nav>
+
+<!-- 主内容区 -->
+<main class="container mx-auto px-4 py-8">
+	<h2 class="text-2xl font-bold text-fresh-dark mb-6">文章管理列表</h2>
+	
+	<div id="article-list" class="bg-white rounded-xl shadow-sm overflow-hidden">
+		<!-- 加载中 -->
+		<div class="text-center py-10 text-fresh-dark">
+			<i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+			<p>加载文章中...</p>
+		</div>
+	</div>
+</main>
+
+<script>
+    // 退出登录
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('isAdmin');
+        window.location.href = '/';
+    });
+
+    // 加载文章列表
+    async function loadArticles() {
+        const articleListEl = document.getElementById('article-list');
+        try {
+            const response = await fetch('/api/articles');
+            const result = await response.json();
+
+            if (!result.success) {
+                articleListEl.innerHTML = `<div class="text-center py-10 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>加载失败：${result.message}</p></div>`;
+                return;
+            }
+
+            const articles = result.data;
+            if (articles.length === 0) {
+                articleListEl.innerHTML = `<div class="text-center py-10 text-fresh-dark"><i class="fa-solid fa-file-alt text-2xl mb-2"></i><p>博主還沒有寫文章呢 ✍️</p></div>`;
+                return;
+            }
+
+            // 渲染管理列表（表格形式）
+            articleListEl.innerHTML = `
+          <table class="w-full">
+            <thead class="bg-fresh-light text-fresh-dark">
+              <tr>
+                <th class="px-6 py-3 text-left">ID</th>
+                <th class="px-6 py-3 text-left">标题</th>
+                <th class="px-6 py-3 text-left">点赞数</th>
+                <th class="px-6 py-3 text-left">创建时间</th>
+                <th class="px-6 py-3 text-left">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${articles.map(article => `
+                <tr class="border-t border-gray-100 hover:bg-fresh-light/30">
+                  <td class="px-6 py-4">${article.id}</td>
+                  <td class="px-6 py-4">${article.title}</td>
+                  <td class="px-6 py-4"><i class="fa-solid fa-heart text-red-500 mr-1"></i>${article.likeCount}</td>
+                  <td class="px-6 py-4">${new Date(article.createTime).toLocaleString('zh-CN')}</td>
+                  <td class="px-6 py-4 flex gap-2">
+                    <a href="/edit.html?id=${article.id}" class="text-blue-500 hover:text-blue-700">
+                      <i class="fa-solid fa-edit mr-1"></i>编辑
+                    </a>
+                    <button onclick="deleteArticle(${article.id})" class="text-red-500 hover:text-red-700">
+                      <i class="fa-solid fa-trash mr-1"></i>删除
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+        } catch (error) {
+            articleListEl.innerHTML = `<div class="text-center py-10 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>网络错误，无法加载文章</p></div>`;
+            console.error(error);
+        }
+    }
+
+    // 删除文章
+    async function deleteArticle(id) {
+        if (!confirm('确定要删除这篇文章吗？删除后无法恢复！')) return;
+
+        try {
+            const response = await fetch(`/api/articles/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                alert('文章删除成功！');
+                loadArticles(); // 重新加载列表
+            } else {
+                alert(`删除失败：${result.message}`);
+            }
+        } catch (error) {
+            alert('网络错误，删除失败！');
+            console.error(error);
+        }
+    }
+
+    // 页面加载时执行
+    document.addEventListener('DOMContentLoaded', loadArticles);
+</script>
+</body>
+</html>

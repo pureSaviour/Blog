@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>清新小站 - 我的文章</title>
+	<!-- 引入Tailwind CSS（快速实现清新风格） -->
+	<script src="https://cdn.tailwindcss.com"></script>
+	<!-- 引入Font Awesome（图标） -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<!-- 自定义Tailwind配置（清新风格配色） -->
+	<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fresh: {
+                            primary: '#8ecc8e', // 清新绿
+                            secondary: '#a8d8ea', // 浅蓝
+                            light: '#f8f9fa', // 浅灰
+                            dark: '#4a5568' // 深灰
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+	</script>
+	<style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow-sm {
+                text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            }
+        }
+	</style>
+</head>
+<body class="bg-fresh-light min-h-screen">
+<!-- 导航栏 -->
+<nav class="bg-white shadow-sm sticky top-0 z-10">
+	<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+		<a href="/" class="text-fresh-primary text-2xl font-bold text-shadow-sm">
+			<i class="fa-solid fa-leaf mr-2"></i>清新小站
+		</a>
+		<!-- 移除普通用户的写文章入口，博主需通过 /admin-login.html 进入 -->
+	</div>
+</nav>
+
+<!-- 主内容区 -->
+<main class="container mx-auto px-4 py-8">
+	<!-- 头部横幅 -->
+	<div class="bg-gradient-to-r from-fresh-secondary to-fresh-primary rounded-2xl p-8 mb-8 text-white text-center">
+		<h1 class="text-4xl font-bold mb-2">我的随心随笔</h1>
+		<p class="text-lg opacity-90">记录生活，分享想法 ✨</p>
+	</div>
+	
+	<!-- 文章列表 -->
+	<div id="article-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		<!-- 文章卡片会通过JS动态加载 -->
+		<div class="col-span-full text-center text-fresh-dark py-10">
+			<i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+			<p>加载文章中...</p>
+		</div>
+	</div>
+</main>
+
+<!-- 页脚 -->
+<footer class="bg-white mt-10 py-6 shadow-inner">
+	<div class="container mx-auto px-4 text-center text-fresh-dark">
+		<p>© 2026 清新小站 | 自由生长，随心记录</p>
+	</div>
+</footer>
+
+<!-- 前端脚本 -->
+<script src="/js/index.js"></script>
+</body>
+</html>

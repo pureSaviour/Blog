@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>文章详情 - 清新小站</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fresh: {
+                            primary: '#8ecc8e',
+                            secondary: '#a8d8ea',
+                            light: '#f8f9fa',
+                            dark: '#4a5568'
+                        }
+                    }
+                }
+            }
+        }
+	</script>
+</head>
+<body class="bg-fresh-light min-h-screen">
+<!-- 导航栏 -->
+<nav class="bg-white shadow-sm sticky top-0 z-10">
+	<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+		<a href="/" class="text-fresh-primary text-2xl font-bold">
+			<i class="fa-solid fa-leaf mr-2"></i>清新小站
+		</a>
+		<a href="/" class="text-fresh-dark hover:text-fresh-primary transition-colors">
+			<i class="fa-solid fa-home mr-1"></i>返回首页
+		</a>
+	</div>
+</nav>
+
+<!-- 主内容区 -->
+<main class="container mx-auto px-4 py-8 max-w-4xl">
+	<!-- 文章详情 -->
+	<div id="article-detail" class="bg-white rounded-2xl shadow-sm p-8 mb-8">
+		<!-- 加载中 -->
+		<div class="text-center py-10 text-fresh-dark">
+			<i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i>
+			<p>加载文章中...</p>
+		</div>
+	</div>
+	
+	<!-- 评论区 -->
+	<div class="bg-white rounded-2xl shadow-sm p-8">
+		<h3 class="text-xl font-bold text-fresh-dark mb-6">
+			<i class="fa-solid fa-comments mr-2"></i>评论区
+		</h3>
+		
+		<!-- 评论提交表单 -->
+		<form id="comment-form" class="mb-8">
+			<div class="mb-4">
+				<label for="username" class="block text-fresh-dark mb-2 font-medium">你的昵称</label>
+				<input type="text" id="username" name="username"
+					   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+					   placeholder="输入昵称...">
+			</div>
+			<div class="mb-4">
+				<label for="comment-content" class="block text-fresh-dark mb-2 font-medium">评论内容</label>
+				<textarea id="comment-content" name="content" rows="4"
+						  class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+						  placeholder="写下你的想法..."></textarea>
+			</div>
+			<button type="submit" class="bg-fresh-primary hover:bg-green-500 text-white px-4 py-2 rounded-lg transition-colors">
+				<i class="fa-solid fa-paper-plane mr-1"></i>提交评论
+			</button>
+		</form>
+		
+		<!-- 评论列表 -->
+		<div id="comment-list">
+			<div class="text-center py-6 text-fresh-dark">
+				<i class="fa-solid fa-spinner fa-spin text-xl mb-2"></i>
+				<p>加载评论中...</p>
+			</div>
+		</div>
+	</div>
+</main>
+
+<script>
+    // 获取文章ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = urlParams.get('id');
+    if (!articleId) {
+        alert('无效的文章ID！');
+        window.location.href = '/';
+    }
+
+    // 加载文章详情
+    async function loadArticleDetail() {
+        const articleDetailEl = document.getElementById('article-detail');
+        try {
+            const response = await fetch(`/api/articles/${articleId}`);
+            const result = await response.json();
+
+            if (!result.success) {
+                articleDetailEl.innerHTML = `<div class="text-center py-10 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>加载失败：${result.message}</p></div>`;
+                return;
+            }
+
+            const article = result.data;
+            articleDetailEl.innerHTML = `
+          <h1 class="text-3xl font-bold text-fresh-dark mb-4">${article.title}</h1>
+          <div class="flex justify-between items-center text-gray-500 mb-6">
+            <div>
+              <i class="fa-solid fa-clock mr-1"></i>
+              ${new Date(article.createTime).toLocaleString('zh-CN')}
+            </div>
+            <div>
+              <button id="like-btn" class="flex items-center gap-1 text-red-500 hover:text-red-600 transition-colors">
+                <i class="fa-solid fa-heart"></i>
+                <span>${article.likeCount}</span> 点赞
+              </button>
+            </div>
+          </div>
+          ${article.cover ? `<img src="${article.cover}" alt="${article.title}" class="w-full h-64 object-cover rounded-lg mb-6">` : ''}
+          <div class="text-gray-700 leading-relaxed whitespace-pre-line">${article.content}</div>
+        `;
+
+            // 绑定点赞按钮事件
+            document.getElementById('like-btn').addEventListener('click', async () => {
+                const likeBtn = document.getElementById('like-btn');
+                if (likeBtn.classList.contains('liked')) return; // 防止重复点赞
+
+                try {
+                    const response = await fetch(`/api/articles/${articleId}/like`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        likeBtn.classList.add('liked');
+                        likeBtn.innerHTML = `<i class="fa-solid fa-heart"></i><span>${result.data.likeCount}</span> 已点赞`;
+                    } else {
+                        alert(`点赞失败：${result.message}`);
+                    }
+                } catch (error) {
+                    alert('网络错误，点赞失败！');
+                    console.error(error);
+                }
+            });
+        } catch (error) {
+            articleDetailEl.innerHTML = `<div class="text-center py-10 text-red-500"><i class="fa-solid fa-exclamation-circle text-2xl mb-2"></i><p>网络错误，无法加载文章</p></div>`;
+            console.error(error);
+        }
+    }
+
+    // 加载评论列表
+    async function loadComments() {
+        const commentListEl = document.getElementById('comment-list');
+        try {
+            const response = await fetch(`/api/articles/${articleId}/comments`);
+            const result = await response.json();
+
+            if (!result.success) {
+                commentListEl.innerHTML = `<div class="text-center py-6 text-red-500"><i class="fa-solid fa-exclamation-circle text-xl mb-2"></i><p>加载评论失败：${result.message}</p></div>`;
+                return;
+            }
+
+            const comments = result.data;
+            if (comments.length === 0) {
+                commentListEl.innerHTML = `<div class="text-center py-6 text-fresh-dark"><i class="fa-solid fa-comment-slash text-xl mb-2"></i><p>暂无评论，快来抢沙发吧 💬</p></div>`;
+                return;
+            }
+
+            // 渲染评论
+            commentListEl.innerHTML = comments.map(comment => `
+          <div class="border-b border-gray-100 py-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-medium text-fresh-dark">${comment.username}</span>
+              <span class="text-xs text-gray-400">${new Date(comment.createTime).toLocaleString('zh-CN')}</span>
+            </div>
+            <p class="text-gray-600">${comment.content}</p>
+          </div>
+        `).join('');
+        } catch (error) {
+            commentListEl.innerHTML = `<div class="text-center py-6 text-red-500"><i class="fa-solid fa-exclamation-circle text-xl mb-2"></i><p>网络错误，无法加载评论</p></div>`;
+            console.error(error);
+        }
+    }
+
+    // 提交评论
+    document.getElementById('comment-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const content = document.getElementById('comment-content').value.trim();
+
+        if (!username || !content) {
+            alert('昵称和评论内容不能为空！');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/articles/${articleId}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, content })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                alert('评论提交成功！');
+                document.getElementById('comment-form').reset();
+                loadComments(); // 重新加载评论
+            } else {
+                alert(`提交失败：${result.message}`);
+            }
+        } catch (error) {
+            alert('网络错误，评论提交失败！');
+            console.error(error);
+        }
+    });
+
+    // 页面加载时执行
+    document.addEventListener('DOMContentLoaded', () => {
+        loadArticleDetail();
+        loadComments();
+    });
+</script>
+</body>
+</html>

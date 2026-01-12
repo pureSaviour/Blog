@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>编辑文章 - 清新小站</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fresh: {
+                            primary: '#8ecc8e',
+                            secondary: '#a8d8ea',
+                            light: '#f8f9fa',
+                            dark: '#4a5568'
+                        }
+                    }
+                }
+            }
+        }
+	</script>
+</head>
+<body class="bg-fresh-light min-h-screen">
+<!-- 权限验证 -->
+<script>
+    if (localStorage.getItem('isAdmin') !== 'true') {
+        window.location.href = '/admin-login.html';
+    }
+    // 获取URL中的文章ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = urlParams.get('id');
+    if (!articleId) {
+        alert('无效的文章ID！');
+        window.location.href = '/admin.html';
+    }
+</script>
+
+<!-- 导航栏 -->
+<nav class="bg-white shadow-sm sticky top-0 z-10">
+	<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+		<a href="/admin.html" class="text-fresh-primary text-2xl font-bold">
+			<i class="fa-solid fa-leaf mr-2"></i>清新小站（管理后台）
+		</a>
+		<div>
+			<a href="/admin.html" class="text-fresh-dark hover:text-fresh-primary px-4 py-2 transition-colors">
+				<i class="fa-solid fa-list mr-1"></i>文章列表
+			</a>
+		</div>
+	</div>
+</nav>
+
+<!-- 编辑表单 -->
+<main class="container mx-auto px-4 py-8 max-w-3xl">
+	<div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+		<h2 class="text-2xl font-bold text-fresh-dark mb-6">编辑文章</h2>
+		<form id="edit-form">
+			<!-- 标题 -->
+			<div class="mb-4">
+				<label for="title" class="block text-fresh-dark mb-2 font-medium">文章标题</label>
+				<input type="text" id="title" name="title"
+					   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+					   placeholder="输入文章标题...">
+			</div>
+			
+			<!-- 封面图 -->
+			<div class="mb-4">
+				<label for="cover" class="block text-fresh-dark mb-2 font-medium">封面图URL（可选）</label>
+				<input type="text" id="cover" name="cover"
+					   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+					   placeholder="输入图片URL...">
+			</div>
+			
+			<!-- 内容 -->
+			<div class="mb-6">
+				<label for="content" class="block text-fresh-dark mb-2 font-medium">文章内容</label>
+				<textarea id="content" name="content" rows="10"
+						  class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+						  placeholder="输入文章内容..."></textarea>
+			</div>
+			
+			<!-- 提交按钮 -->
+			<button type="submit" class="w-full bg-fresh-primary hover:bg-green-500 text-white py-3 rounded-lg transition-colors font-medium">
+				<i class="fa-solid fa-save mr-2"></i>保存修改
+			</button>
+		</form>
+	</div>
+</main>
+
+<script>
+    // 加载文章原有内容
+    async function loadArticle() {
+        try {
+            const response = await fetch(`/api/articles/${articleId}`);
+            const result = await response.json();
+
+            if (!result.success) {
+                alert(`加载文章失败：${result.message}`);
+                window.location.href = '/admin.html';
+                return;
+            }
+
+            const article = result.data;
+            // 回显内容
+            document.getElementById('title').value = article.title;
+            document.getElementById('cover').value = article.cover || '';
+            document.getElementById('content').value = article.content;
+        } catch (error) {
+            alert('网络错误，加载文章失败！');
+            console.error(error);
+        }
+    }
+
+    // 提交修改
+    document.getElementById('edit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('title').value.trim();
+        const content = document.getElementById('content').value.trim();
+        const cover = document.getElementById('cover').value.trim();
+
+        if (!title || !content) {
+            alert('标题和内容不能为空！');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/articles/${articleId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content, cover })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                alert('文章修改成功！');
+                window.location.href = '/admin.html';
+            } else {
+                alert(`修改失败：${result.message}`);
+            }
+        } catch (error) {
+            alert('网络错误，修改失败！');
+            console.error(error);
+        }
+    });
+
+    // 页面加载时加载文章
+    document.addEventListener('DOMContentLoaded', loadArticle);
+</script>
+</body>
+</html>

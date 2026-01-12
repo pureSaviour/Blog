@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>写文章 - 清新小站</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fresh: {
+                            primary: '#8ecc8e',
+                            secondary: '#a8d8ea',
+                            light: '#f8f9fa',
+                            dark: '#4a5568'
+                        }
+                    }
+                }
+            }
+        }
+	</script>
+</head>
+<body class="bg-fresh-light min-h-screen">
+<!-- 导航栏 -->
+<nav class="bg-white shadow-sm sticky top-0 z-10">
+	<div class="container mx-auto px-4 py-4 flex justify-between items-center">
+		<a href="/" class="text-fresh-primary text-2xl font-bold">
+			<i class="fa-solid fa-leaf mr-2"></i>清新小站
+		</a>
+		<div>
+			<a href="/" class="text-fresh-dark hover:text-fresh-primary px-4 py-2 transition-colors">
+				<i class="fa-solid fa-home mr-1"></i>首页
+			</a>
+		</div>
+	</div>
+</nav>
+
+<!-- 写文章表单 -->
+<main class="container mx-auto px-4 py-8 max-w-3xl">
+	<div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+		<h2 class="text-2xl font-bold text-fresh-dark mb-6">写一篇新文章</h2>
+		<form id="article-form">
+			<!-- 标题 -->
+			<div class="mb-4">
+				<label for="title" class="block text-fresh-dark mb-2 font-medium">文章标题</label>
+				<input type="text" id="title" name="title"
+					   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+					   placeholder="输入文章标题...">
+			</div>
+			
+			<!-- 封面图（可选） -->
+			<div class="mb-4">
+				<label for="cover" class="block text-fresh-dark mb-2 font-medium">封面图URL（可选）</label>
+				<input type="text" id="cover" name="cover"
+					   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+					   placeholder="输入图片URL...">
+			</div>
+			
+			<!-- 内容 -->
+			<div class="mb-6">
+				<label for="content" class="block text-fresh-dark mb-2 font-medium">文章内容</label>
+				<textarea id="content" name="content" rows="10"
+						  class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+						  placeholder="输入文章内容..."></textarea>
+			</div>
+			
+			<!-- 提交按钮 -->
+			<button type="submit" class="w-full bg-fresh-primary hover:bg-green-500 text-white py-3 rounded-lg transition-colors font-medium">
+				<i class="fa-solid fa-paper-plane mr-2"></i>发布文章
+			</button>
+		</form>
+	</div>
+</main>
+
+<!-- 页脚 -->
+<footer class="bg-white mt-auto py-6 shadow-inner">
+	<div class="container mx-auto px-4 text-center text-fresh-dark">
+		<p>© 2026 清新小站 | 自由生长，随心记录</p>
+	</div>
+</footer>
+
+<!-- 提示弹窗（隐藏） -->
+<div id="toast" class="fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg text-white opacity-0 transition-opacity duration-300 z-50"></div>
+
+<!-- 前端脚本 -->
+<script src="/js/write.js"></script>
+</body>
+</html>
