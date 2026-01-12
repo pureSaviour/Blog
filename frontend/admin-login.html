@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>博主登录 - 清新小站</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fresh: {
+                            primary: '#8ecc8e',
+                            secondary: '#a8d8ea',
+                            light: '#f8f9fa',
+                            dark: '#4a5568'
+                        }
+                    }
+                }
+            }
+        }
+	</script>
+</head>
+<body class="bg-fresh-light min-h-screen flex items-center justify-center">
+<div class="bg-white rounded-2xl shadow-sm p-8 w-full max-w-md">
+	<div class="text-center mb-6">
+		<i class="fa-solid fa-shield-halved text-fresh-primary text-4xl mb-2"></i>
+		<h2 class="text-2xl font-bold text-fresh-dark">博主管理后台</h2>
+		<p class="text-gray-500">请输入管理密码</p>
+	</div>
+	
+	<form id="login-form">
+		<div class="mb-4">
+			<label for="password" class="block text-fresh-dark mb-2 font-medium">管理密码</label>
+			<input type="password" id="password" name="password"
+				   class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-fresh-primary/50 focus:border-fresh-primary transition-colors"
+				   placeholder="输入密码...">
+		</div>
+		<button type="submit" class="w-full bg-fresh-primary hover:bg-green-500 text-white py-3 rounded-lg transition-colors font-medium">
+			<i class="fa-solid fa-key mr-2"></i>进入后台
+		</button>
+	</form>
+	
+	<div id="error-tip" class="mt-4 text-center text-red-500 hidden">
+		<i class="fa-solid fa-exclamation-circle mr-1"></i>密码错误，请重试
+	</div>
+</div>
+
+<script>
+    // 博主密码（可自行修改，建议后续存到.env）
+    const ADMIN_PASSWORD = 'admin123'; // 🔴 请务必修改为自己的密码！
+
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const password = document.getElementById('password').value.trim();
+        const errorTip = document.getElementById('error-tip');
+
+        if (password === ADMIN_PASSWORD) {
+            // 验证成功，跳转到管理页面
+            localStorage.setItem('isAdmin', 'true'); // 本地存储标记博主身份
+            window.location.href = '/admin.html';
+        } else {
+            // 密码错误
+            errorTip.classList.remove('hidden');
+            setTimeout(() => errorTip.classList.add('hidden'), 3000);
+        }
+    });
+</script>
+</body>
+</html>
