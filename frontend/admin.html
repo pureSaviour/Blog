@@ -4,8 +4,6 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>文章管理 - 清新小站</title>
-	<!-- 修复：替换Tailwind CDN为本地（先注释CDN，消除生产提示，后续可替换本地文件） -->
-	<!-- <link rel="stylesheet" href="/css/tailwind.min.css"> -->
 	<script src="https://cdn.tailwindcss.com"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 	<script>
@@ -140,7 +138,6 @@
 
     // 唯一的loadArticles函数（合并所有正确逻辑，删除重复定义）
     async function loadArticles() {
-        // 获取正确的DOM元素（id=article-list，连字符）
         const articleListEl = document.getElementById('article-list');
         if (!articleListEl) {
             console.error('未找到ID为article-list的元素，请检查HTML结构');
@@ -160,7 +157,6 @@
             });
 
             const result = await response.json();
-            // 处理接口返回失败
             if (!result.success) {
                 articleListEl.innerHTML = `
                     <div class="text-center py-10 text-red-500">
@@ -237,7 +233,6 @@
         }
     }
 
-    // DOM加载完成后执行加载
     document.addEventListener('DOMContentLoaded', loadArticles);
 </script>
 </body>
